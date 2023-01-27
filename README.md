@@ -12,3 +12,5 @@ Currently, this:
 To do- 
 1. Clean up, add, and organize opcodes- they are a mess right now as a result of me validating functionality.
 2. Structure source code more efficently, it is one jumbled up file for now.
+3. Create assembler (and maybe compiler).
+4. Create simple games, maybe pong, snake, etc.
