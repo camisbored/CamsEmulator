@@ -1,0 +1,184 @@
+//move value to reg
+mov r1, val
+mov r2, val
+mov r3, val
+mov r4, val
+mov r5, val
+
+//mov register to mem subress
+str r1, addr
+str r2, addr
+str r3, addr
+str r4, addr
+str r5, addr
+
+//mov mem address to register
+ldr r1, addr
+ldr r2, addr
+ldr r3, addr
+ldr r4, addr
+ldr r5, addr
+
+//add to reg
+add r1, val
+add r2, val
+add r3, val
+add r4, val
+add r5, val
+
+//sub from reg
+sub r1, val
+sub r2, val
+sub r3, val
+sub r4, val
+sub r5, val
+
+//multiply reg by val
+mul r1, val
+mul r2, val
+mul r3, val
+mul r4, val
+mul r5, val
+
+//divide reg by val
+div r1, val
+div r2, val
+div r3, val
+div r4, val
+div r5, val
+
+//stack ops
+push r1
+push r2
+push r3
+push r4
+push r5
+
+pop r1
+pop r2
+pop r3
+pop r4
+pop r5
+
+//cmp reg to val
+cmp r1, val
+cmp r2, val
+cmp r3, val
+cmp r4, val
+cmp r5, val
+
+//shift left reg by val
+shl r1, val
+shl r2, val
+shl r3, val
+shl r4, val
+shl r5, val
+
+//shift right reg by val
+shr r1, val
+shr r2, val
+shr r3, val
+shr r4, val
+shr r5, val
+
+//and reg with val
+and r1, val
+and r2, val
+and r3, val
+and r4, val
+and r5, val
+
+//and reg with val
+or r1, val
+or r2, val
+or r3, val
+or r4, val
+or r5, val
+
+//xor reg with val
+xor r1, val
+xor r2, val
+xor r3, val
+xor r4, val
+xor r5, val
+
+//top of stack ops
+mov sp, val
+add sp, val
+add sp, r1
+add sp, r2
+add sp, r3
+add sp, r4
+add sp, r5
+sub sp, val
+sub sp, r1
+sub sp, r2
+sub sp, r3
+sub sp, r4
+sub sp, r5
+mul sp, val
+mul sp, r1
+mul sp, r2
+mul sp, r3
+mul sp, r4
+mul sp, r5
+div sp, val
+div sp, r1
+div sp, r2
+div sp, r3
+div sp, r4
+div sp, r5
+cmp sp, val
+cmp sp, r1
+cmp sp, r2
+cmp sp, r3
+cmp sp, r4
+cmp sp, r5
+str sp, addr
+ldr sp, addr
+shl sp, r1
+shl sp, r2
+shl sp, r3
+shl sp, r4
+shl sp, r5
+shr sp, r1
+shr sp, r2
+shr sp, r3
+shr sp, r4
+shr sp, r5
+and sp, r1
+and sp, r2
+and sp, r3
+and sp, r4
+and sp, r5
+or  sp, r1
+or  sp, r2
+or  sp, r3
+or  sp, r4
+or  sp, r5
+xor sp, r1
+xor sp, r2
+xor sp, r3
+xor sp, r4
+xor sp, r5
+
+//general ops
+pusha
+popa
+
+jmp addr
+je addr
+jne addr
+
+call func
+ret
+
+getch
+putPixel, r1 (x), r2(y), r3(r), r4(g), r5(b)
+putPixelRedraw r1 (x), r2(y), r3(r), r4(g), r5(b)
+redraw
+playsound, freq(*100), length(*100)
+sleep
+nop
+
+hlt

@@ -6,6 +6,7 @@
 
 #define codeSize 0xFF
 #define memorySize 0xFF
+#define stackSize 0xFF
 #define frameBufferSize 0xFFFF
 #define bytesPerPixel 3
 
@@ -15,12 +16,15 @@ BITMAPINFO bmi;
 
 char errorMessage[50];
 char debugMessage[250];
+char bufferMessage[0xFF*4]={0};
 
 unsigned char codeMemory[codeSize]={0};
 unsigned char ramMemory[memorySize]={0};
+unsigned char stack[stackSize]={0};
 unsigned char frameBuffer[frameBufferSize*bytesPerPixel]={0};
 
-unsigned char lastRead=-1;
+unsigned char lastRead=0;
+unsigned char lastOp=0;
 
 unsigned char r1 = 0;
 unsigned char r2 = 0;
@@ -45,13 +49,6 @@ void refresh(HWND hwnd){
 	InvalidateRect(hwnd,&rect,TRUE);
 }
 
-//DWORD WINAPI refresh(LPVOID lpParam){
-//	HWND hwnd = (HWND) lpParam;
-//	RECT rect;
-//	GetClientRect(hwnd, &rect);
-//	InvalidateRect(hwnd,&rect,TRUE);
-//}
-
 DWORD WINAPI gettt( LPVOID lpParam ) {
 		char i;
 	   while(1){
@@ -64,124 +61,188 @@ DWORD WINAPI gettt( LPVOID lpParam ) {
 	}
 }
 
-//DWORD WINAPI runOp( LPVOID lpParam ) {
-void runOp(HWND hwnd){
-//	HWND hwnd = (HWND) lpParam;
-	if (lastRead == 0x00){
-		isRunning = 0;
-	}
-	else if (lastRead==0x01){
-		r1=readByte();
-	} else if (lastRead==0x02){
-		r2=readByte();
-	} else if (lastRead==0x03){
-		r3=readByte();
-	} else if (lastRead==0x04){
-		r4=readByte();
-	} else if (lastRead==0x05){
-		r5=readByte();
-	} else if (lastRead==0x06){
-		r1 = r1 + r2;
-	} else if (lastRead==0x07){
-		r2 = r2 + r3;	
-	} else if (lastRead==0x08){
-		r1 = r2;	
-	} else if (lastRead==0x09){
-		r1 = r1 + r3;
-	} else if (lastRead==0x0A){
-		r4++;	
-	} else if (lastRead==0x0B){
-		r5++;		
-	} else if (lastRead==0x0C){
-		r1=r5;
-	} else if (lastRead==0x0D){
-		r1--;
-	} else if (lastRead==0x0E){
-		r5--;
-	} else if (lastRead==0x0F){
-		r2--;
-	} else if (lastRead==0x10){
-		ip = readByte();
-	} else if (lastRead==0x11){
-		flag = (r1==readByte());
-	} else if (lastRead==0x12){
-		if (flag)
-			ip = readByte();
-		else
-			readByte();
-	} else if (lastRead==0x13){
-		if (!flag)
-			ip = readByte();
-		else
-			readByte();
-	} else if (lastRead==0x14){
-		flag = (r2==readByte());
-	} else if (lastRead==0x15){
-		r1++;
-	} else if (lastRead==0x16){
-		r2++;
-	} else if (lastRead==0x17){
-		flag=0;
-	} else if (lastRead==0x18){
-		flag = (r5==readByte());
-	} else if (lastRead==0x19){
-		Beep(1000, 100);
-	} else if (lastRead==0x1A){
-		PlaySound(TEXT("SystemAsteriskk"), NULL, SND_ALIAS | SND_ASYNC);
-	} else if (lastRead==0x1B){
-		Sleep(1000);
-	} else if (lastRead==0x1C){
-		MessageBeep(MB_OK);
-	} else if (lastRead==0x90){
-	 //NO-OP
-	} else if (lastRead==0xFD){
-		SetPixel(hdcMem, r1, r2, RGB(r3, r4, r5));
-	} else if (lastRead==0xFF){
-//		int offset = (r1*bytesPerPixel)+(r2*0xFF*bytesPerPixel);
-//		frameBuffer[offset] = 0;
-//		frameBuffer[offset+1] = 255;
-//		frameBuffer[offset+2] = 0;
-		SetPixel(hdcMem, r1, r2, RGB(r3, r4, r5));
-//		HANDLE hThread = CreateThread(NULL, 0, refresh, &hwnd, 0, NULL);
-//		WaitForSingleObject(hThread, INFINITE);
-//		CloseHandle(hThread);
-//		refresh(hwnd);
-//        SetDIBitsToDevice(hdcMem, 0, 0, 255, 255, 0, 0, 0, 255, frameBuffer, &bmi, DIB_RGB_COLORS);
-		refresh(hwnd);
-	} else if (lastRead==0xEE){
-		int i;
-//		printf("made it here");
-//		char c = gettt();
-
-		HANDLE hThread = CreateThread(NULL, 0, gettt, NULL, 0, NULL);
-		WaitForSingleObject(hThread, INFINITE);
-		CloseHandle(hThread);
-		printf("%c\n", lastPressed);
-		r5=lastPressed;
-//		printf("%c", c);
-//	    char ch = getch();
-		//sprintf(errorMessage, "Key Pressed: %c", c);
-		//MessageBox(0,errorMessage,"Alert",MB_OK); 	
-//		}		while(1){
-//			for (i=8;i<=190;i++){
-//				if (GetKeyState(i)&0x8000){
-//					printf("Key %d is pressed", i);
-//				}
-//			}
-//		}
-	} else if (lastRead==0xDD){
-//		SetDIBitsToDevice(hdcMem, 0, 0, 255, 255, 0, 0, 0, 255, frameBuffer, &bmi, DIB_RGB_COLORS);
-		refresh(hwnd);
-	} else {
-		sprintf(errorMessage, "Illegal instruction detected: 0x%2X", lastRead);
-		MessageBox(0,errorMessage,"Runtime Error",MB_OK); 	
-		isRunning = 0;
-	}
-	
+push(unsigned char val){
+	int i;
+	for (i=memorySize;i>0;i--)
+		stack[i]= stack[i-1];
+    stack[0]=val;
+    sp = sp+1;
 }
 
-void load(HWND hwnd){
-	
+pop(unsigned char val){
+	int i;
+	if (val == 0x01)
+		r1 = stack[0];
+	else if (val == 0x02)
+		r2 = stack[0];
+	else if (val == 0x03)
+		r3 = stack[0];
+	else if (val == 0x04)
+		r4 = stack[0];
+	else if (val == 0x05)
+		r5 = stack[0];
+	for (i=1;i<memorySize;i++)
+    	stack[i-1]=stack[i];
+    stack[sp]=0;
+    sp = sp-1;  
+}
+
+void runOp(HWND hwnd){
+	lastOp = lastRead;
+	switch(lastRead){
+		case 0x00:
+			isRunning = 0;
+			break;
+		case 0x01:
+			r1 = readByte();
+			break;
+		case 0x02:
+			r2 = readByte();
+			break;
+		case 0x03:
+			r3 = readByte();
+			break;
+		case 0x04:
+			r4 = readByte();
+			break;
+		case 0x05:
+			r5 = readByte();
+			break;
+		case 0x06:
+			r1 = ramMemory[readByte()];
+			break;
+		case 0x07:
+			r2 = ramMemory[readByte()];
+			break;
+		case 0x08:
+			r3 = ramMemory[readByte()];
+			break;
+		case 0x09:
+			r4 = ramMemory[readByte()];
+			break;
+		case 0x0A:
+			r5 = ramMemory[readByte()];
+			break;
+		case 0x0B:
+			ramMemory[readByte()]=r1;
+			break;
+		case 0x0C:
+			ramMemory[readByte()]=r2;
+			break;
+		case 0x0D:
+			ramMemory[readByte()]=r3;
+			break;
+		case 0x0E:
+			ramMemory[readByte()]=r4;
+			break;
+		case 0x0F:
+			ramMemory[readByte()]=r5;
+			break;
+		case 0x10:
+			r1 = r1+readByte();
+			break;
+		case 0x11:
+			r2 = r2+readByte();
+			break;
+		case 0x12:
+			r3 = r3+readByte();
+			break;
+		case 0x13:
+			r4 = r4+readByte();
+			break;
+		case 0x14:
+			r5 = r5+readByte();
+			break;
+		case 0x15:
+			r1 = r1-readByte();
+			break;
+		case 0x16:
+			r2 = r2-readByte();
+			break;
+		case 0x17:
+			r3 = r3-readByte();
+			break;
+		case 0x18:
+			r4 = r4-readByte();
+			break;
+		case 0x19:
+			r5 = r5-readByte();
+			break;
+		case 0x1A:
+			r1 = r1*readByte();
+			break;
+		case 0x1B:
+			r2 = r2*readByte();
+			break;
+		case 0x1C:
+			r2 = r2*readByte();
+			break;
+		case 0x1D:
+			r3 = r3*readByte();
+			break;
+		case 0x1E:
+			r4 = r4*readByte();
+			break;
+		case 0x1F:
+			r5 = r5*readByte();
+			break;
+		case 0x20:
+			r1 = r1/readByte();
+			break;
+		case 0x21:
+			r2 = r2/readByte();
+			break;
+		case 0x22:
+			r3 = r3/readByte();
+			break;
+		case 0x23:
+			r4 = r4/readByte();
+			break;
+		case 0x24:
+			r5 = r5/readByte();
+			break;
+		case 0x25:
+			push(r1);
+			break;
+		case 0x26:
+			push(r2);
+			break;
+		case 0x27:
+			push(r3);
+			break;
+		case 0x28:
+			push(r4);
+			break;
+		case 0x29:
+			push(r5);
+			break;
+		case 0x2A:
+			pop(0x01);
+			break;
+		case 0x2B:
+			pop(0x02);
+			break;
+		case 0x2C:
+			pop(0x03);
+			break;
+		case 0x2D:
+			pop(0x04);
+			break;
+		case 0x2E:
+			pop(0x05);
+			break;
+		case 0x2F:
+
+			break;
+
+		default:
+			isRunning = 0;
+			sprintf(errorMessage, "Illegal instruction detected: 0x%2X", lastRead);
+			MessageBox(0,errorMessage,"Runtime Error",MB_OK); 	
+	}	
+}
+
+void resetState(){
 	r1 = 0;
 	r2 = 0;
 	r3 = 0;
@@ -192,6 +253,11 @@ void load(HWND hwnd){
 	sp = 0;
 	lastPressed = 0x00;
 	isRunning = 0x00;
+}
+
+void load(HWND hwnd){
+	
+	resetState();
 
 	OPENFILENAME ofn;
 	TCHAR fileName[MAX_PATH];
@@ -218,7 +284,7 @@ void load(HWND hwnd){
 	        return;
 	    }
 	
-	    // Read 1024 bytes from the file into the buffer
+	    // Read codeSize bytes from the file into the buffer
 	    if (ReadFile(file, codeMemory, codeSize, &bytesRead, NULL)) {
 	    		int i;
 				for (i = 0; i < codeSize; i++){
@@ -231,22 +297,13 @@ void load(HWND hwnd){
 	        return;
 	    }
 	
-	    CloseHandle(file); // Close the file
+	    CloseHandle(file);
 	    MessageBox(0,ofn.lpstrFile,"File Loaded",1); 
 	} else {
 		sprintf(errorMessage, "The last error code was %d", GetLastError());
 		MessageBox(0,errorMessage,"Unexpected Error",1); 
 		return;
 	}
-//	RECT rect = { 0, 0, 255, 255 };
-//    FillRect(hdcMem, &rect, (HBRUSH)GetStockObject(BLACK_BRUSH));
-//    refresh(hwnd);
-//    int i, j;
-//    for (j=0;j<255;j++){
-//        for (i=0;i<255;i++){
-//    		SetPixel(hdcMem, i, j, RGB(0, rand()%255, 0));
-//		}	
-//	}
     int i, j=0;
     for (j=0;j<255;j++){
         for (i=0;i<255;i++){
@@ -257,43 +314,85 @@ void load(HWND hwnd){
 }
 
 
-//void run(HWND hwnd){
 DWORD WINAPI run( LPVOID lpParam ) {
 	HWND hwnd = (HWND) lpParam;
 	isRunning = 1;
 	while (isRunning){		
 		readByte();
-//		if (lastRead == 0x00){
-//			break;
-//		}
-//		HANDLE hThread = CreateThread(NULL, 0, runOp, hwnd, 0, NULL);
-//		WaitForSingleObject(hThread, INFINITE);
-//		CloseHandle(hThread);
 		runOp(hwnd);
 	}
 }
 
 void step(HWND hwnd){
 	isRunning = 1;
-//	int i, j;
-//    for (j=0;j<255;j++){
-//        for (i=0;i<255;i++){
-//    		SetPixel(hdcMem, i, j, RGB(0, 0, rand()%255));
-//		}	
-//	}
-//	refresh(hwnd);
-		readByte();
-//		HANDLE hThread = CreateThread(NULL, 0, runOp, hwnd, 0, NULL);
-//		WaitForSingleObject(hThread, INFINITE);
-//		CloseHandle(hThread);
-		runOp(hwnd);
+	readByte();
+	runOp(hwnd);
+}
+
+struct DebugData {
+    char* textValue;
+    char* textType;
+};
+
+DWORD WINAPI showDebug(LPVOID lpParameter) {
+	LPCSTR text = (LPCSTR) lpParameter;
+	struct DebugData* params = (struct DebugData*)lpParameter;
+    char* textValue = params->textValue;
+    char* textType = params->textType;
+    MessageBox(NULL, textValue, textType, MB_OK);
+    return 0;
 }
 
 void debug(HWND hwnd){
 	sprintf(debugMessage, 
-	"r1: 0x%02X\nr2: 0x%02X\nr3: 0x%02X\nr4: 0x%02X\nr5: 0x%02X\nflag: 0x%02X\nip: 0x%02X\nsp: 0x%02X\nlastRead: 0x%02X\nisRunning: 0x%02X\n",
-	r1,r2,r3,r4,r5,flag,ip,sp,lastRead,isRunning);
-	MessageBox(0,debugMessage,"Current Register Values",MB_OK); 
+	"r1: 0x%02X\nr2: 0x%02X\nr3: 0x%02X\nr4: 0x%02X\nr5: 0x%02X\nflag: 0x%02X\nip: 0x%02X\nsp: 0x%02X\nlastOp: 0x%02X\nlastRead: 0x%02X\nisRunning: 0x%02X\n",
+	r1,r2,r3,r4,r5,flag,ip,sp,lastOp,lastRead,isRunning);
+	
+	struct DebugData params1;
+    params1.textValue = debugMessage;
+    params1.textType = "Current Register Values";
+	CreateThread(NULL, 0, showDebug, &params1, 0, NULL);
+
+	int i;
+	char codeBuffer[256 * 4 + 1];
+    sprintf(codeBuffer, "%02x ", codeMemory[0]);
+    for (i = 1; i < 256; i++) {
+        sprintf(codeBuffer + strlen(codeBuffer), "%02x ", codeMemory[i]);
+		if (i==15 || (i+1)%16==0)
+			sprintf(codeBuffer + strlen(codeBuffer), "\n");
+    }
+
+	struct DebugData params2;
+    params2.textValue = codeBuffer;
+    params2.textType = "Code Section";
+	CreateThread(NULL, 0, showDebug, &params2, 0, NULL);
+
+	char ramBuffer[256 * 4 + 1];
+    sprintf(ramBuffer, "%02x ", ramMemory[0]);
+    for (i = 1; i < 256; i++) {
+        sprintf(ramBuffer + strlen(ramBuffer), "%02x ", ramMemory[i]);
+		if (i==15 || (i+1)%16==0)
+			sprintf(ramBuffer + strlen(ramBuffer), "\n");
+    }
+	
+	struct DebugData params3;
+    params3.textValue = ramBuffer;
+    params3.textType = "Memory Section";
+	CreateThread(NULL, 0, showDebug, &params3, 0, NULL);
+
+	char stackBuffer[256 * 4 + 1];
+    sprintf(stackBuffer, "%02x ", stack[0]);
+    for (i = 1; i < 256; i++) {
+        sprintf(stackBuffer + strlen(stackBuffer), "%02x ", stack[i]);
+		if (i==15 || (i+1)%16==0)
+			sprintf(stackBuffer + strlen(stackBuffer), "\n");
+    }
+
+	struct DebugData params4;
+    params4.textValue = stackBuffer;
+    params4.textType = "Stack";
+	CreateThread(NULL, 0, showDebug, &params4, 0, NULL);
+
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -308,7 +407,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			        HANDLE hThread = CreateThread(NULL, 0, run, hwnd, 0, NULL);
 					WaitForSingleObject(hThread, IGNORE);
 					CloseHandle(hThread);
-                    //run(hwnd);
                 }    
                     break;
                 case 3:
@@ -332,29 +430,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             bmi.bmiHeader.biBitCount = 24;
             bmi.bmiHeader.biCompression = BI_RGB;
             hBitmap = CreateDIBSection(hdcMem, &bmi, DIB_RGB_COLORS, NULL, NULL, 0);
-//            hBitmap = CreateDIBSection(hdcMem, &bmi, DIB_RGB_COLORS, (void**)&frameBuffer, NULL, 0);
 
             SelectObject(hdcMem, hBitmap);
-
-//            int i, j=0;
-//            for (j=0;j<255;j++){
-//                for (i=0;i<255;i++){
-//            				SetPixel(hdcMem, i, j, RGB(255, 255,255));
-//				}	
-//			}
 
             // Clear the framebuffer to black
             RECT rect = { 0, 0, 255, 255 };
             FillRect(hdcMem, &rect, (HBRUSH)GetStockObject(BLACK_BRUSH));
-//
+
             HPEN hPen = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
             SelectObject(hdcMem,hPen);
-            
-        
-//        	int m;
-//            for (m=0;m<frameBufferSize*bytesPerPixel;m++){
-//            	frameBuffer[m]= 122;
-//			}
             
             MoveToEx(hdcMem, 10, 10, NULL);//W
             LineTo(hdcMem, 20, 40);
@@ -405,39 +489,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             MoveToEx(hdcMem, 245, 38, NULL);
             LineTo(hdcMem, 245, 40);
 
-//            SetDIBitsToDevice(hdcMem, 0, 0, 255, 255, 0, 0, 0, 255, frameBuffer, &bmi, DIB_RGB_COLORS);
-//            for (m=0;m<frameBufferSize*bytesPerPixel;m++){
-//            	frameBuffer[m]= 255;
-//			}
-//			SetDIBitsToDevice(hdcMem, 0, 0, 255, 255, 0, 0, 0, 255, frameBuffer, &bmi, DIB_RGB_COLORS);
-
-//            int m;
-//            for (m=0;m<frameBufferSize;m++){
-//            	frameBuffer[m]=122;
-//			}
-            
-            
-//            HBRUSH hbrRed = CreateSolidBrush(RGB(255, 0, 0));
-//            SelectObject(hdcMem,hbrRed);
-//            MoveToEx(hdcMem, 0, 0, NULL);
-//            LineTo(hdcMem, 100, 100);
-
             return 0;
         }
         case WM_PAINT: {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
 
-//            int i, j=0;
-//            for (j=0;j<255;j++){
-//                for (i=0;i<255;i++){
-//            				SetPixel(hdcMem, i, j, RGB(rand()%255, 0,0));
-//				}	
-//			}
-//            HBRUSH hbrWhite = (HBRUSH)GetStockObject(WHITE_BRUSH);
-//            SelectObject(hdcMem,hbrWhite);
-//            MoveToEx(hdcMem, 10, 10, NULL);
-//            LineTo(hdcMem, 50, 50);
             // Draw the framebuffer to the window
             BitBlt(hdc, 0, 0, 255, 255, hdcMem, 0, 0, SRCCOPY);
 
@@ -452,12 +509,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             PostQuitMessage(0);
             return 0;
         }
-//        case WM_KEYDOWN:{
-//        	if (wParam == 'A'){
-//        		MessageBox(0,"Hit","Hit",1); 
-//			}
-//			break;
-//		}
     }
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
@@ -507,15 +558,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     
     int x = (screenWidth-windowWidth)/2;
     int y = (screenHeight-windowHeight)/2;
-    SetWindowPos(hwnd, 0, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+    SetWindowPos(hwnd, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
 
-//	HICON hicon = LoadIcon(NULL, IDI_EXCLAMATION);
-//	HICON hicon = LoadIcon(NULL, IDI_ICON1);
 	HICON hicon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_ICON1));
-
-//	HICON hicon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
-//	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM) hicon);
 
     ShowWindow(hwnd, nCmdShow);
 
