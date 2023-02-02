@@ -1,3 +1,6 @@
+			int i;
+			char keyCheck = 0;
+
 void runOp(HWND hwnd){
 	lastOp = lastRead;
 	switch(lastRead){
@@ -475,7 +478,23 @@ void runOp(HWND hwnd){
 			r5 = lastPressed;
 			break;
 		case 0x98:
-			flag = checkIfKeyPressed();
+		for(i = 8; i <= 190; i++) {
+	        if (GetAsyncKeyState(i) == -32767){
+				lastPressed = i;
+				keyCheck = 1;
+				//break;
+			}	
+	    }
+		if (keyCheck == 1){
+			r5 = lastPressed;
+		}
+		keyCheck = 0;
+			// Sleep(100);
+			// checkKeyWrapper();
+			//  if (keyPressedForCheck){
+			// 	r5=lastPressed;
+			// 	printf("%d\n", r5);
+			//  }
 			break;
 		case 0x99:
 			SetPixel(hdcMem, r1, r2, RGB(r3, r4, r5));
@@ -491,10 +510,11 @@ void runOp(HWND hwnd){
 			r5 = rand()%255;
 			break;
 		case 0x9D:
-			Beep(50*readByte(), 50*readByte());
+			//Beep(50*readByte(), 50*readByte());
+			beepAsyncWrapper(); readByte(); readByte();
 			break;
 		case 0x9E:
-			Sleep(50*readByte());
+			Sleep(1*readByte());
 			break;
 		case 0x9F:
 			flag = 0;

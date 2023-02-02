@@ -35,6 +35,7 @@ unsigned char ip = 0;
 unsigned char sp = 0;
 
 char lastPressed = 0x00;
+char keyPressedForCheck = 0x00;
 unsigned char isRunning = 0x00;
 
 #include "functions.c"

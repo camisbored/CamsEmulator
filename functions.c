@@ -27,14 +27,34 @@ void keyWrapper(){
 		CloseHandle(hThread);
 }
 
-char checkIfKeyPressed(){
+DWORD WINAPI checkIfKeyPressed( LPVOID lpParam ){
 	char i;
 		for(i = 8; i <= 190; i++) {
 	        if (GetAsyncKeyState(i) == -32767){
-					return 1;
+				lastPressed = i;
+				keyPressedForCheck = 1;
+				return;
 			}
-			return 0;
+			keyPressedForCheck = 0;
+			return;
 	    }
+}
+
+DWORD WINAPI beepAsync( LPVOID lpParam ){
+	Beep(2500, 50);
+	return;
+}
+
+void beepAsyncWrapper(){
+		HANDLE hThread = CreateThread(NULL, 0, beepAsync, NULL, 0, NULL);
+		WaitForSingleObject(hThread, IGNORE);
+		CloseHandle(hThread);
+}
+
+void checkKeyWrapper(){
+		HANDLE hThread = CreateThread(NULL, 0, checkIfKeyPressed, NULL, 0, NULL);
+		WaitForSingleObject(hThread, INFINITE);
+		CloseHandle(hThread);
 }
 
 push(unsigned char val){
