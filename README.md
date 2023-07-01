@@ -23,9 +23,15 @@ To get started, I included some different roms and the source for them in both t
 
 <img width="211" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/b364409c-9286-432d-8ef8-796c5f8cf99e">
 
+
+
 <img width="553" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/4652c86a-c3ef-4dbd-8024-9f526845aa9e">
 
+
+
 <img width="209" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/eb6c467b-d00f-4dc4-b662-2d47eaf7ded4">
+
+
 
 <img width="215" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/d9a6dae6-dca4-4ebd-a377-6f27b319d2d9">
 
