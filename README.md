@@ -1,6 +1,6 @@
 # CamsEmulator
 
-<img width="620" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/d51b13ae-da52-415b-8e49-29900109be1e">
+<img width="632" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/69677fe4-a5a2-4aed-9b5b-ab9185a72d5f">
 
 
 This is a emulator for a hypothetical computer architecture, implemented using C and the Windows API. This is in early phases of development. For CE assembly format instructions, look in the instruction-set.txt file. For opcodes for these instructions, you can look in the assembler source code. This is currently a 8 bit architecture, but next phases of this would involve switching to 16 bit.
