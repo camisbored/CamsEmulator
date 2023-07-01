@@ -21,19 +21,15 @@ To do-
 
 To get started, I included some different roms and the source for them in both the src/roms and bin/roms directories. These have examples of drawing art to screen, I/O, audio output, rng.
 
-<img width="211" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/b364409c-9286-432d-8ef8-796c5f8cf99e">
+<img width="220" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/51a11a66-9094-4585-98bd-b1f0d5c6a138">
+
+<img width="217" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/5e8f6992-cc73-4e80-8373-6f3de5c74be2">
+
+<img width="220" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/f9e1a577-a0c9-4a3a-aa25-6b42a2813d20">
+
+<img width="206" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/6e51cc36-cb80-4337-9988-41404ac32599">
 
 
-
-<img width="553" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/4652c86a-c3ef-4dbd-8024-9f526845aa9e">
-
-
-
-<img width="209" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/eb6c467b-d00f-4dc4-b662-2d47eaf7ded4">
-
-
-
-<img width="215" alt="image" src="https://github.com/camisbored/CamsEmulator/assets/81730723/d9a6dae6-dca4-4ebd-a377-6f27b319d2d9">
 
 
 
