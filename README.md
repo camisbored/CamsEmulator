@@ -12,11 +12,12 @@ Currently, this:
 4. Contains input and output functions, reading keystrokes and drawing pixels to screen.
 5. Allows simple audio beeps.
 6. Has an assembler to convert CE format .asm files to .ce binaries that can be run.
+7. Has a simple compile that will convert a custom language (.cg) files to .asm. See source roms for basic examples.
 
 To do- 
 1. Switch to using 16 bit addressing. I started this as 8 bits for simplicities sake, but leaving it as 8 bits has severe implications on memory space and being usable (256 bytes of memory, stack space, code size). Uping this to 16 bit will allow 65k of addressable space in these sections.
 2. Restructure and organize c code. Get rid of warnings, move around functions, etc.
-4. Create compiler.
+4. Enhance compiler.
 5. Create games, maybe pong, snake, etc.
 
 To get started, I included some different roms and the source for them in both the src/roms and bin/roms directories. These have examples of drawing art to screen, I/O, audio output, rng.
