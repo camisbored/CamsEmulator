@@ -1,0 +1,43 @@
+// demo.cg
+// demos syntax of language
+// current limitation: no nested loops
+
+//evaluate expression and assign
+x = 1 + 3 - 2 * 2 / 2 | 1 & 2 < 1 > 2 ^ 3;
+
+y = 4;
+
+//built in functions
+sleep(25);
+sound(25,25);
+draw(x,y);
+k = input();
+l = random();
+
+//if else logic with == or != conditions
+if (x==y){
+    variable1 = 122;
+} else {
+    variable 1 = 432;
+}
+
+//while loop with == or != conditions
+while (y != 200){
+   y = y + 1;
+   draw(x,y);
+   sleep(25);
+   temp = input();
+}
+
+//define user function
+def myFunc(){
+  x = x + 1;
+  y = y + 1;
+}
+
+//call user function
+myFunc();
+
+//inline asm
+asm("hlt");
+

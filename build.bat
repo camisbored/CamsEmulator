@@ -16,6 +16,21 @@ pause
 javac -d bin/assembler src/assembler/CEAssembler.java
 echo If no error messges then assembler built.
 
+echo Beginning assembler compilation...
+pause
+javac -d bin/compiler src/compiler/CECompiler.java
+echo If no error messges then compiler built.
+
+echo Beginning source compilation...
+pause
+set "sourceFolder=src\roms"
+set "destinationFolder=src\roms"
+for %%F in (%sourceFolder%\*.cg) do (
+    set "fileName=%%~nF"
+    java -cp bin/compiler CECompiler "%sourceFolder%\%%~nxF" "%destinationFolder%\!fileName!.asm"
+)
+echo If no errors, all .asm files have been assembled.
+
 echo Beginning rom assembly...
 pause
 set "sourceFolder=src\roms"

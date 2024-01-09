@@ -1,0 +1,30 @@
+//input.cg
+//allows user to draw on screen with WASD keys
+
+x = 115;
+y = 115;
+z = 0;
+
+asm("start:");
+
+z = input();
+
+if (z==87){
+    y = y - 1;
+}
+
+if (z==65){
+    x = x - 1;
+}
+
+if (z==83){
+    y = y + 1;
+}
+
+if (z==68){
+    x = x + 1;
+}
+
+draw(x,y);
+
+asm("jmp start");

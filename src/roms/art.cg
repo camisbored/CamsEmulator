@@ -1,0 +1,16 @@
+//art.cg
+//draws random pixels on screen
+
+while (1==1){
+
+    x = random();
+    y = random();
+    r = random();
+    g = random();
+    b = random();
+
+    drawRGB(x,y,r,g,b);
+
+    sleep(1);
+
+}
