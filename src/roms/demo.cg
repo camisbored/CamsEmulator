@@ -18,7 +18,7 @@ l = random();
 if (x==y){
     variable1 = 122;
 } else {
-    variable 1 = 432;
+    variable1 = 432;
 }
 
 //while loop with == or != conditions
